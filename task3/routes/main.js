@@ -1,14 +1,18 @@
 const express = require('express')
 const router = express.Router()
 const nodemailer = require('nodemailer')
-const { products, skills } = require('../data.json')
+const db = require('../db')()
 
 router.get('/', (req, res, next) => {
+  const products = db.get('products')
+  const skills = db.get('skills')
   res.render('pages/index', { title: 'Main page', products, skills })
 })
 
 router.post('/', async (req, res, next) => {
   if (!req.body.name || !req.body.email || !req.body.message) {
+   const products = db.get('products')
+   const skills = db.get('skills')
    res.render('pages/index', { title: 'Main page', products, skills, msgemail: 'Нужно заполнить все поля'})
   }
   const account = await nodemailer.createTestAccount()
@@ -31,10 +35,13 @@ router.post('/', async (req, res, next) => {
   }
   })
   transporter.sendMail(mailOptions, function (err) {
+    const products = db.get('products')
+   const skills = db.get('skills')
     if (err) {
+      res.render('pages/index', { title: 'Main page', products, skills, msgemail: 'Ошибка отправки сообщения'})
       console.log(err)
     } else {
-      res.redirect('/')
+   res.render('pages/index', { title: 'Main page', products, skills, msgemail: 'Сообщение отправлено успешно'})
     }
   })
 })

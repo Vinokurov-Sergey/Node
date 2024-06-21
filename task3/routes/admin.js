@@ -5,6 +5,9 @@ const fs = require('fs')
 const formidable = require('formidable')
 const db = require('../db')()
 
+let updatedSkills = false
+let uploadFileError = false
+
 router.get('/', (req, res, next) => {
   if (!req.session.isAdmin) {
     res.redirect('/login')
@@ -16,15 +19,25 @@ router.get('/', (req, res, next) => {
     cities: dbskills[2].number,
     years: dbskills[3].number,
   }
+
+  if (updatedSkills === true) {
+    res.locals.msgskill = req.flash('msgskill')
+    updatedSkills = false
+  }
+  if (uploadFileError === true) {
+    res.locals.msgfile = req.flash('msgfile')
+    uploadFileError = false
+  }
+  
   res.render('pages/admin', { title: 'Admin page', skills})
 })
 
 router.post('/skills', (req, res, next) => {
   const reqSkills = Object.values(req.body)
-  const skills = db.get('skills')
+  const dbSkills = db.get('skills')
 
   let index = 0
-  const newSkills = skills.map((skill) => {
+  const newSkills = dbSkills.map((skill) => {
     skill.number = Number(reqSkills[index])
     index++
     return skill
@@ -32,6 +45,10 @@ router.post('/skills', (req, res, next) => {
 
    db.set('skills', newSkills)
    db.save()
+
+  req.flash('msgskill', 'Данные обновлены')
+  updatedSkills = true
+
   res.redirect('/admin')
 })
 
@@ -48,7 +65,9 @@ router.post('/upload', (req, res, next) => {
     fs.rename(files.photo[0].filepath, fileName, function(err) {
       if (err) {
         console.log(err.message)
-        return false
+      req.flash('msgfile', 'Ошибка при добавлении файла')
+      uploadFileError = true
+        res.redirect('/admin')
       }
     })
     const dir = fileName.substring(fileName.indexOf('\\'))

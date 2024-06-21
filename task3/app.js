@@ -3,6 +3,7 @@ const express = require('express')
 const path = require('path')
 const logger = require('morgan')
 const session = require('express-session')
+const flash = require('connect-flash')
 
 const mainRouter = require('./routes/')
 
@@ -32,6 +33,8 @@ app.use(session({
   saveUninitialized: false,
   resave: false
 }))
+
+app.use(flash())
 
 app.use('/', mainRouter)
 
