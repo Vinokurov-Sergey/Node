@@ -1,7 +1,7 @@
 {
   "skills": [
     {
-      "number": 30,
+      "number": 35,
       "text": "Возраст начала занятий на скрипке"
     },
     {
@@ -9,7 +9,7 @@
       "text": "Концертов отыграл"
     },
     {
-      "number": 10,
+      "number": 9,
       "text": "Максимальное число городов в туре"
     },
     {
@@ -77,6 +77,16 @@
       "src": "\\uploads\\parrot.jpg",
       "name": "птица3",
       "price": 600
+    },
+    {
+      "src": "\\uploads\\parrot.jpg",
+      "name": "Семен",
+      "price": 2500
+    },
+    {
+      "src": "\\uploads\\parrot.jpg",
+      "name": "Антон 123",
+      "price": 5000
     }
   ]
 }

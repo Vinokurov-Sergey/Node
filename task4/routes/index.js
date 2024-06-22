@@ -16,14 +16,18 @@ const rename = util.promisify(fs.rename)
     ctx.redirect('/login');
 }
 
-const { products, skills } = require('../data.json')
+ let updatedSkills = false
 
 router.get('/', async ctx => {
+  const products = db.get('products')
+  const skills = db.get('skills')
   await ctx.render('pages/index', { title: 'Main page', products, skills })
 })
 
 router.post('/', koaBody(), async ctx => {
     if (!ctx.request.body.name || !ctx.request.body.email || !ctx.request.body.message) {
+        const products = db.get('products')
+        const skills = db.get('skills')
         await ctx.render('pages/index', { title: 'Main page', products, skills, msgemail: 'Нужно заполнить все поля'})
        }
        const account = await nodemailer.createTestAccount()
@@ -46,11 +50,16 @@ router.post('/', koaBody(), async ctx => {
        })
        try {
         const result = await transporter.sendMail(mailOptions)
+        
         if (result) {
+         const products = db.get('products')
+         const skills = db.get('skills')
          await ctx.render('pages/index', { title: 'Main page', products, skills, msgemail: 'Сообщение успешно отправлено'})
         }
        } catch (error) {
         console.log(error)
+        const products = db.get('products')
+        const skills = db.get('skills')
         await ctx.render('pages/index', { title: 'Main page', products, skills, msgemail: 'Ошибка отправки сообщения'})
        }
 })
@@ -71,6 +80,7 @@ router.get('/login', async ctx => {
   })
 
   router.get('/admin', async ctx => {
+    console.log('GET')
     if (!ctx.session.isAdmin) {
       ctx.redirect('/login')
     }
@@ -81,10 +91,17 @@ router.get('/login', async ctx => {
       cities: dbskills[2].number,
       years: dbskills[3].number,
     }
-    await ctx.render('pages/admin', { title: 'Admin page', skills })
+
+    let msgskill = undefined
+    if (updatedSkills === true) {
+     msgskill = 'Данные обновлены'
+    updatedSkills = false
+    }
+     await ctx.render('pages/admin', { title: 'Admin page', skills, msgskill: msgskill })
   })
   
-  router.post('/admin/skills', koaBody(), ctx => {
+  router.post('/admin/skills', koaBody(), async ctx => {
+    console.log('POST')
     const reqSkills = Object.values(ctx.request.body)
     const skills = db.get('skills')
   
@@ -97,6 +114,8 @@ router.get('/login', async ctx => {
   
      db.set('skills', newSkills)
      db.save()
+     
+    updatedSkills = true
     ctx.redirect('/admin')
   })
   
