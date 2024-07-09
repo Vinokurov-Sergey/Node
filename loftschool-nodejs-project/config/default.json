@@ -1,0 +1,5 @@
+{
+    "jwtSecret": "gnmkgn7600kfgf",
+    "tokenLife": "10m",
+    "refreshTokenLife": "1h"
+}
