@@ -13,6 +13,7 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use(express.static(path.join(__dirname, 'build')))
 app.use('/', express.static(path.join(__dirname, 'build')))
+app.use(express.static(path.join(__dirname, 'uploads')))
 
 app.use(session({
     store: new fileStore(),

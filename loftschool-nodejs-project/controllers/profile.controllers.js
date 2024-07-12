@@ -1,3 +1,6 @@
+const path = require('path')
+const fs = require('fs')
+const formidable = require('formidable')
 const User = require('../db').models.user
 
 module.exports.profile = async (req, res) => {
@@ -21,34 +24,46 @@ module.exports.profile = async (req, res) => {
     }
 }
 
-module.exports.updateProfile = async (req, res) => {
+module.exports.updateProfile = async (req, res, next) => {
     try {
-        const user = req.user
-        const id = user.dataValues.id
-        const oldPass = req.body.oldPassword
+        const form = new formidable.IncomingForm()
+        const photoDir = path.join('uploads')
+         form.uploadDir = path.join(process.cwd(), photoDir)
 
-       console.log("updateProfile req.body = ", req.body)
-        console.log("updateProfile req.payload = ", req.payload)
-        console.log("updateProfile req.params = ", req.params)
-
-        const _user = await User.findOne({where: {id}})
-        console.log("updateProfile oldPass = ", oldPass)
-        console.log("updateProfile _user.dataValues.password = ", _user.dataValues.password)
-        if (_user.dataValues.password === oldPass) {
-            const data = {
-                    firstName: req.body.firstName,
-                    middleName: req.body.middleName,
-                    surName: req.body.surName,
-                    oldPassword: oldPass,
-                    newPassword: req.body.newPassword,
-                    avatar: req.body.image
+        form.parse(req, async function(err, fields, files, dir) {
+            if (err) {
+              return next(err)
             }
-            await User.update(data, {where: {id}})
-            res.json(data)
-        } else {
-            res.json({result: false, data: 'Пароли не совпадают'})
-        }
+            if (Object.keys(files).length !== 0) {
+              const fileName = path.join(photoDir, files.avatar[0].originalFilename)
+              fs.rename(files.avatar[0].filepath, fileName, function(err) {
+                if (err) {
+                  console.log(err.message)
+                  return false
+                }
+              })
+              dir = fileName.split('\\')[1]
+            }
 
+           const id = req.user.dataValues.id
+            const user = await User.findOne({where: {id}})
+            if (user.dataValues.password === fields.oldPassword[0]) {
+                const data = {
+                        id: id,
+                        username: user.userName,
+                        firstName: fields.firstName[0],
+                        middleName: fields.middleName[0],
+                        surName: fields.surName[0],
+                        password: fields.newPassword[0],
+                        permission: user.permission,
+                        image: dir ?? user.image
+                }
+                await User.update(data, {where: {id}})
+                res.json(data)
+            } else {
+                res.json({result: false, data: 'Пароли не совпадают'})
+            }
+    })
     } catch (err) {
         console.log(err)
         res.status(500).json({message: 'Ошибка'})

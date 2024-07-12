@@ -6,13 +6,13 @@ module.exports.getAllNews = async () => {
     const _result = result.map(function (news) {
       const user = JSON.parse(news.dataValues.user)
       const data = {
-        id: news.dataValues.id,
+        id: news.dataValues.id.toString(),
         created_at: news.dataValues.createdAt,
         text: news.dataValues.text,
         title: news.dataValues.title,
         user: {
             firstName: user.firstName,
-            id: user.id,
+            id: user.id.toString(),
             image: user.image,
             middleName: user.middleName,
             surName: user.surName,
@@ -22,5 +22,5 @@ module.exports.getAllNews = async () => {
       return data
       })
 
-      return _result
+     return _result
 }
