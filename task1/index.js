@@ -2,6 +2,7 @@ const yargs = require('yargs');
 const path = require('path');
 const fs = require('fs');
 const { COPYFILE_EXCL } = fs.constants;
+
 const args = yargs.usage('Usage: node $0 [options]')
   .help('help').alias('help', 'h')
   .version('1.0.0').alias('version', 'v')
